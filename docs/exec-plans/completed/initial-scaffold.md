@@ -227,3 +227,27 @@ These are intentional latitude — the builder should pick a sensible default, d
 - Docker / Railway / any deployment config
 
 These are listed so the reviewer doesn't flag them as gaps.
+
+---
+
+## Post-scaffold revision (2026-05-26)
+
+Per user request after the first-run smoke test, the file browser was
+restored from the starter (`/files` route, `app/runtime/files.py`,
+`app/service/files.py`, `app/service/metadata.py`, `app/types/files.py`,
+plus the corresponding React components and TanStack hooks). The user
+explicitly chose **full CRUD, no guard on `papers/`** — anything under
+the sample's B2 prefix can be deleted from the UI, including cached
+PDFs. This contradicts §2 (trim list above), which removed the file
+browser entirely. Rationale: bucket observability outweighs a safety
+rail in a single-developer sample; an accidentally-deleted paper costs
+one re-fetch on the next briefing run, not data loss. The Pillow /
+PyPDF2 dependencies the starter used for richer image / PDF detail were
+**not** restored — the detail panel degrades gracefully to a "no
+detailed metadata available" hint for those mime types. See
+`docs/features/file-browser.md`.
+
+The same revision pass also hardened arxiv 429 handling in
+`app/repo/arxiv_client.py` and added a `failed_arxiv_rate_limit` brief
+status — see `docs/features/paper-discovery.md` -> "Rate limit handling"
+for the policy.

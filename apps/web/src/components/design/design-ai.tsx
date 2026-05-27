@@ -26,13 +26,13 @@ export function DesignAI() {
                 <Bot className="h-3.5 w-3.5" />
               </span>
               <div className="chat-bubble assistant">
-                Hi — I can help you search your bucket, summarize activity,
-                or draft storage policies. What&apos;s on your mind?
+                Hi — I can summarize a brief, explain how a paper was ranked,
+                or compare findings across briefs. What&apos;s on your mind?
               </div>
             </div>
             <div className="flex justify-end animate-bubble-in">
               <div className="chat-bubble user">
-                Summarize my storage usage this week.
+                Summarize the latest brief.
               </div>
             </div>
             <div className="flex items-start gap-2 animate-bubble-in">
@@ -57,20 +57,24 @@ export function DesignAI() {
           <CardContent className="p-5 space-y-4">
             <p className="text-xs text-muted-foreground">
               Use <code className="font-mono text-[11px]">.prompt-chip</code>{" "}
-              for clickable starter questions in an empty chat state.
+              for clickable prompt chips in an empty chat state.
             </p>
             <div className="flex flex-wrap gap-2">
               <span className="prompt-chip">
                 <Wand2 className="h-3.5 w-3.5" />
-                Summarize this bucket
+                Summarize the latest brief
               </span>
               <span className="prompt-chip">
                 <MessageSquare className="h-3.5 w-3.5" />
-                Explain presigned URLs
+                Explain how the abstract ranker works
               </span>
               <span className="prompt-chip">
                 <Bot className="h-3.5 w-3.5" />
-                Draft a lifecycle rule
+                Compare these two papers
+              </span>
+              <span className="prompt-chip">
+                <MessageSquare className="h-3.5 w-3.5" />
+                Draft a follow-up question on paper X
               </span>
             </div>
             <p className="text-xs text-muted-foreground pt-2">

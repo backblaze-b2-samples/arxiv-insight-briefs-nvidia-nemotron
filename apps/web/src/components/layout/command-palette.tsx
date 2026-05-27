@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import {
   FileText,
   Archive,
+  FolderOpen,
   Settings,
   Sparkles,
   Moon,
@@ -31,6 +32,9 @@ interface CommandPaletteProps {
 const routes = [
   { label: "New brief", href: "/", icon: FileText, hint: "N" },
   { label: "Archive", href: "/briefings", icon: Archive, hint: "A" },
+  // File browser actions — restored alongside the /files page.
+  { label: "Open files", href: "/files", icon: FolderOpen, hint: "F" },
+  { label: "Browse papers cache", href: "/files?prefix=papers/", icon: FolderOpen },
   { label: "Settings", href: "/settings", icon: Settings },
   { label: "Design system", href: "/design", icon: Sparkles },
 ];

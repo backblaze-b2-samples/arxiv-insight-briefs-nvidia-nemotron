@@ -14,6 +14,10 @@ export type BriefStatus =
   | "done_no_analysis"
   | "failed"
   | "failed_llm"
+  // arxiv's IP-level throttle is outside our retry budget — surfaced as a
+  // distinct, user-actionable state ("wait 15-30 min") rather than a
+  // generic failure.
+  | "failed_arxiv_rate_limit"
   | "cancelled";
 
 export interface BriefRequest {
@@ -96,3 +100,31 @@ export interface HealthStatus {
   b2_connected: boolean;
   nvidia_configured: boolean;
 }
+
+// File-browser response models. Mirrors of `services/api/app/types/files.py`.
+// Used by `/files` and the file explorer UI; unrelated to briefings.
+export interface FileMetadata {
+  key: string;
+  filename: string;
+  folder: string;
+  size_bytes: number;
+  size_human: string;
+  content_type: string;
+  uploaded_at: string; // ISO datetime
+  url?: string | null;
+}
+
+export interface FileMetadataDetail {
+  filename: string;
+  size_bytes: number;
+  size_human: string;
+  mime_type: string;
+  extension: string;
+  uploaded_at: string; // ISO datetime
+  etag?: string | null;
+}
+
+// Mirror of `app.service.files.FileNotFoundError` / `FileKeyError` surfaces
+// from the HTTP layer — kept here for symmetry with the Python side.
+export type FileStatus = "ok" | "not_found" | "invalid_key";
+

@@ -13,6 +13,7 @@ const LABELS: Record<BriefStatus, string> = {
   done_no_analysis: "Done (no analysis)",
   failed: "Failed",
   failed_llm: "LLM failed",
+  failed_arxiv_rate_limit: "arxiv rate limited",
   cancelled: "Cancelled",
 };
 
@@ -24,6 +25,7 @@ const TERMINAL = new Set<BriefStatus>([
   "done_no_analysis",
   "failed",
   "failed_llm",
+  "failed_arxiv_rate_limit",
   "cancelled",
 ]);
 
@@ -34,6 +36,10 @@ export function StatusBadge({ status }: { status: BriefStatus }) {
   }
   if (status === "failed" || status === "failed_llm") {
     return <Badge variant="destructive">{label}</Badge>;
+  }
+  // Rate-limit is recoverable (just wait): muted amber, not destructive.
+  if (status === "failed_arxiv_rate_limit") {
+    return <Badge className="bg-amber-500/80 text-white">{label}</Badge>;
   }
   if (status === "cancelled") {
     return <Badge variant="outline">{label}</Badge>;

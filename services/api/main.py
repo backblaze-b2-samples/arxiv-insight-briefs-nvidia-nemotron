@@ -18,7 +18,7 @@ from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 from starlette.middleware.base import BaseHTTPMiddleware  # noqa: E402
 
 from app.config import settings  # noqa: E402
-from app.runtime import briefings, health, metrics, papers  # noqa: E402
+from app.runtime import briefings, files, health, metrics, papers  # noqa: E402
 
 # --- Startup validation ---
 # Required B2 settings are declared with empty-string defaults so that
@@ -107,4 +107,5 @@ app.add_middleware(BaseHTTPMiddleware, dispatch=metrics.timing_middleware)
 app.include_router(health.router, tags=["health"])
 app.include_router(briefings.router, tags=["briefings"])
 app.include_router(papers.router, tags=["papers"])
+app.include_router(files.router, tags=["files"])
 app.include_router(metrics.router, tags=["metrics"])

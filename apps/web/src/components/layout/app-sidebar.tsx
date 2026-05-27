@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FileText, Archive, Settings, Sparkles } from "lucide-react";
+import { FileText, Archive, FolderOpen, Settings, Sparkles } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -19,6 +19,9 @@ import {
 const navItems = [
   { title: "New brief", href: "/", icon: FileText },
   { title: "Archive", href: "/briefings", icon: Archive },
+  // Files sits between Archive and Settings — bucket-level CRUD over the
+  // configured B2 prefix, restored from the starter on user request.
+  { title: "Files", href: "/files", icon: FolderOpen },
   { title: "Settings", href: "/settings", icon: Settings },
 ];
 
@@ -52,7 +55,8 @@ export function AppSidebar() {
                 const isActive =
                   pathname === item.href ||
                   (item.href === "/briefings" &&
-                    pathname.startsWith("/briefings"));
+                    pathname.startsWith("/briefings")) ||
+                  (item.href === "/files" && pathname.startsWith("/files"));
                 return (
                   <SidebarMenuItem key={item.href}>
                     <SidebarMenuButton

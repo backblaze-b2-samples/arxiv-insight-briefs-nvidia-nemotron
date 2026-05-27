@@ -20,6 +20,10 @@ BriefStatus = Literal[
     "done_no_analysis",
     "failed",
     "failed_llm",
+    # arxiv's IP-level throttle is outside our retry budget — surfaced as a
+    # distinct, user-actionable state ("wait 15-30 min") rather than a
+    # generic failure.
+    "failed_arxiv_rate_limit",
     "cancelled",
 ]
 

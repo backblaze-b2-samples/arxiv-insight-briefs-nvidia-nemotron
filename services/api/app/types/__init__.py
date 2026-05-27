@@ -9,6 +9,7 @@ from app.types.briefings import (
     RankedPaper,
     ResolvedQuery,
 )
+from app.types.files import FileMetadata, FileMetadataDetail
 
 __all__ = [
     "BriefManifest",
@@ -16,6 +17,8 @@ __all__ = [
     "BriefStatus",
     "BriefSummary",
     "Citation",
+    "FileMetadata",
+    "FileMetadataDetail",
     "InsightSection",
     "PresignedLink",
     "RankedPaper",

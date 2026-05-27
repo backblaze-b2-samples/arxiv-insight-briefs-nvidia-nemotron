@@ -14,6 +14,7 @@ from threading import BoundedSemaphore
 
 from app.config import settings
 from app.repo import job_state
+from app.repo.arxiv_client import ArxivRateLimitError
 from app.service import (
     abstract_ranker,
     arxiv_search,
@@ -120,6 +121,19 @@ def run_brief(brief_id: str, request: BriefRequest) -> None:
             manifest = initial_manifest(brief_id, request)
             job_state.save_manifest(manifest)
         _run_inner(manifest, request)
+    except ArxivRateLimitError as e:
+        # Distinct terminal state: not a bug in our code, just arxiv's
+        # IP-level throttle (15-30 min). Surface a literal, actionable
+        # message the UI can render verbatim.
+        logger.warning("pipeline: arxiv rate-limited for brief %s: %s", brief_id, e)
+        manifest = job_state.load_manifest(brief_id)
+        if manifest is not None:
+            manifest.status = "failed_arxiv_rate_limit"
+            manifest.error = (
+                "arxiv is rate-limiting our query. Wait 15-30 minutes and "
+                "try again; results may also be cached by the time you retry."
+            )
+            job_state.save_manifest(manifest)
     except Exception as e:
         logger.exception("pipeline: unhandled error for brief %s", brief_id)
         manifest = job_state.load_manifest(brief_id)

@@ -55,6 +55,28 @@ LLM relevance score against the user's question.
   the brief `failed` with the upstream error in the manifest
 - Legacy arxiv ids with slashes/dots → sanitized via `arxiv_client.sanitize_arxiv_id`
 
+## Rate limit handling
+arxiv enforces ~1 request / 3 seconds and aggressively IP-throttles
+clients that exceed that budget (15-30 minute cool-down, undocumented but
+empirically reproducible). The repo layer has two stacked defenses:
+
+1. **arxiv-py internal retry.** `arxiv.Client(num_retries=8, delay_seconds=3.0)`
+   absorbs brief 429 bursts without our pipeline noticing.
+2. **Outer tenacity retry.** Wraps `_client.results(...)` with
+   `wait_exponential(multiplier=1, min=30, max=300)` and `stop_after_attempt(4)`
+   — schedule is **30s -> 60s -> 120s -> 240s** between attempts. The same
+   policy guards `download_pdf` against PDF-endpoint 429s.
+3. **Translation to a domain error.** After the budget is exhausted,
+   `arxiv_client.search` raises `ArxivRateLimitError`, which `pipeline.py`
+   maps onto a terminal `failed_arxiv_rate_limit` brief status. The
+   user-facing message reads literally: *"arxiv is rate-limiting our
+   query. Wait 15-30 minutes and try again; results may also be cached by
+   the time you retry."*
+
+The IP-level throttle is outside our control — when it triggers, the
+brief is parked at `failed_arxiv_rate_limit` (not `failed`) so the UI can
+render an amber, recoverable Alert rather than a destructive one.
+
 ## Verification
 - Test files: `tests/test_arxiv_search.py`, `tests/test_abstract_ranker.py`
 - Required cases: real-shape fixture XML parsing; ranker happy path;

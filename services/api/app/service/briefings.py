@@ -68,6 +68,17 @@ def clear_brief(brief_id: str) -> bool:
     return deleted > 0
 
 
+def clear_all_briefs() -> int:
+    """Delete every object under the `briefs/` prefix.
+
+    Returns the count of objects removed. The shared `papers/` PDF cache is
+    explicitly preserved — that's the whole point of the danger-zone action.
+    The hard floor against bucket-root deletion lives in
+    `b2_client.delete_prefix`.
+    """
+    return b2_client.delete_prefix("briefs/")
+
+
 def get_brief_markdown(brief_id: str) -> str | None:
     """Read the brief markdown body from B2."""
     key = job_state.brief_markdown_key(brief_id)
@@ -140,6 +151,7 @@ __all__ = [
     "Citation",
     "attach_citations",
     "cancel_brief",
+    "clear_all_briefs",
     "clear_brief",
     "get_brief_markdown",
     "get_manifest",

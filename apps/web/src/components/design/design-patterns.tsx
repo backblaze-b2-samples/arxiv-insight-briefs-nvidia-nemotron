@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
 import { DataTable } from "@/components/ui/data-table";
+import { BriefingViewer } from "@/components/briefings/BriefingViewer";
 import { ApiError } from "@/lib/api-client";
 import { Section } from "./section";
 
@@ -24,6 +25,23 @@ const sampleRows: Row[] = [
   { arxiv_id: "2406.99001", title: "Adaptive striping for object-store reads", category: "cs.DC" },
   { arxiv_id: "2408.55512", title: "End-to-end congestion signal sharing", category: "cs.NI" },
 ];
+
+// Brief-viewer fixture — exercises ordered lists, nested emphasis, fenced
+// code, and citation links. Doubles as the regression surface that the
+// Playwright e2e test asserts against (an ordered list must render as a
+// real <ol> with three <li> children).
+const sampleBriefMarkdown = `# Sample brief
+
+Researchers building large-block file transfer should weigh three trade-offs:
+
+1. **Congestion control** — switching to BBR v3 reduces tail latency.
+2. *Loss recovery* — selective ACK extensions remain the workhorse.
+3. End-to-end \`pacing\` matters more than peak throughput. [arxiv:2401.12345](https://example.com/papers/2401.12345.pdf?sig=demo)
+
+\`\`\`text
+client → CDN edge → origin
+\`\`\`
+`;
 
 const columns: ColumnDef<Row>[] = [
   {
@@ -118,6 +136,17 @@ export function DesignPatterns() {
               pageSize={5}
               emptyTitle="No papers"
             />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="border-b border-border py-4 px-5">
+            <CardTitle className="card-title">
+              Briefing markdown
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-5" data-testid="design-briefing-sample">
+            <BriefingViewer markdown={sampleBriefMarkdown} />
           </CardContent>
         </Card>
 

@@ -55,6 +55,25 @@ async def list_briefings(limit: int = 100) -> list[BriefSummary]:
     return briefings_svc.list_briefs(limit=min(limit, 500))
 
 
+class ClearAllResponse(BaseModel):
+    deleted: int
+
+
+@router.delete("/briefings", response_model=ClearAllResponse)
+async def clear_all_briefings(mode: str = "clear-all") -> ClearAllResponse:
+    """Bulk-clear every brief under the `briefs/` prefix.
+
+    Wired to the Settings danger-zone button. `mode=clear-all` is required
+    to keep this endpoint impossible to hit accidentally with a stray
+    DELETE.  The `papers/` PDF cache is preserved by design — see
+    `briefings_svc.clear_all_briefs`.
+    """
+    if mode != "clear-all":
+        raise HTTPException(status_code=400, detail="mode must be 'clear-all'")
+    deleted = briefings_svc.clear_all_briefs()
+    return ClearAllResponse(deleted=deleted)
+
+
 @router.get("/briefings/{brief_id}", response_model=BriefDetail)
 async def get_briefing(brief_id: str) -> BriefDetail:
     manifest = briefings_svc.get_manifest(brief_id)

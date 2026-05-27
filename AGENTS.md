@@ -107,6 +107,7 @@ See [docs/dev-workflows.md](docs/dev-workflows.md) for full details.
 | PDF cache + extraction | `docs/features/pdf-pipeline.md` |
 | Synthesis prompt + output schema | `docs/features/insight-synthesis.md` |
 | Archive + presigned share | `docs/features/briefing-archive.md` |
+| File browser (list / download / delete) | `docs/features/file-browser.md` |
 | User journeys | `docs/app-workflows.md` |
 | System layout, deployments | `ARCHITECTURE.md` |
 | Dev or testing process | `docs/dev-workflows.md` |

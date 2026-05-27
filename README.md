@@ -5,6 +5,8 @@ A research-brief generator for prospects and engineers exploring **[Backblaze B2
 
 The point of the sample isn't summarization. It's the **B2-as-archive shape**: every brief, every cached PDF, and every extracted-text artifact lives in one bucket, fronted by S3 (`boto3`). The bucket is the database.
 
+![arXiv Insight Briefs — research-brief generator powered by free AI on Backblaze B2](./arXiv-Insight-Briefs-free-ai.png)
+
 ## What you get
 
 - **NL question → arxiv routing.** One Nemotron call resolves "latest research on sending files over the internet" into `{categories: ["cs.NI"], keywords: ["quic", "bbr", "tcp"], time_window_months: 12}`. Hallucinated categories are dropped against a bundled taxonomy. Falls back to keyword search if the LLM is unavailable.
@@ -13,6 +15,7 @@ The point of the sample isn't summarization. It's the **B2-as-archive shape**: e
 - **Section-aware extraction.** PyMuPDF keeps abstract + intro + methods + conclusion, drops references and appendices, and hard-caps each paper at `MAX_PAPER_CHARS`.
 - **Problem-anchored synthesis.** A single Nemotron call produces a markdown brief with structured sections and `[arxiv:ID]` citations. The runtime layer rewrites those to short-lived presigned PDF links before shipping markdown to the UI.
 - **B2 as the archive.** Every brief lives at `briefs/{id}/brief.md` + `manifest.json`. `/briefings` is just `ListObjectsV2`.
+- **File browser.** `/files` surfaces everything under the sample's B2 prefix — papers cache, brief archives, manifests — with download and delete. Unguarded by design (deleting a cached PDF just costs a re-fetch next time).
 
 ## Pipeline
 

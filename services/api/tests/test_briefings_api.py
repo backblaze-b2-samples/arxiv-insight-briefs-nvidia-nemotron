@@ -94,6 +94,34 @@ async def test_clear_briefing_deletes_prefix(client, fake_b2):
 
 
 @pytest.mark.asyncio
+async def test_clear_all_briefings_removes_briefs_prefix_only(client, fake_b2):
+    # Two briefs and a cached paper. The bulk clear must remove the briefs
+    # and leave the paper cache intact — that's the whole invariant.
+    job_state.save_manifest(_manifest("one"))
+    job_state.save_brief_markdown("one", "# body 1")
+    job_state.save_manifest(_manifest("two"))
+    job_state.save_brief_markdown("two", "# body 2")
+    fake_b2[f"arxiv-insight-briefs/{job_state.paper_pdf_key('2401.99999')}"] = b"pdf"
+
+    resp = await client.delete("/briefings?mode=clear-all")
+    assert resp.status_code == 200
+    assert resp.json()["deleted"] >= 4  # 2 manifests + 2 markdown bodies
+
+    assert job_state.load_manifest("one") is None
+    assert job_state.load_manifest("two") is None
+    # The shared PDF cache survives by design.
+    assert (
+        f"arxiv-insight-briefs/{job_state.paper_pdf_key('2401.99999')}" in fake_b2
+    )
+
+
+@pytest.mark.asyncio
+async def test_clear_all_briefings_rejects_wrong_mode(client, fake_b2):
+    resp = await client.delete("/briefings?mode=clear")
+    assert resp.status_code == 400
+
+
+@pytest.mark.asyncio
 async def test_presign_paper_404_when_uncached(client, fake_b2):
     resp = await client.get("/papers/9999.0000/presign")
     assert resp.status_code == 404

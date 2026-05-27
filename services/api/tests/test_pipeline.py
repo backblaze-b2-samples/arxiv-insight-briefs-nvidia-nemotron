@@ -98,3 +98,39 @@ def test_no_analysis_path(fake_b2, fake_arxiv, fake_nemotron, fake_pdf_extractor
     manifest = job_state.load_manifest(brief_id)
     assert manifest.status == "done_no_analysis"
     assert manifest.resolved_query.fallback_used is True
+
+
+def test_arxiv_rate_limit_path(fake_b2, fake_arxiv, fake_nemotron, fake_pdf_extractor, monkeypatch):
+    """When the arxiv repo exhausts its retry budget, the pipeline parks the
+    brief at `failed_arxiv_rate_limit` with the prescribed user-facing message."""
+    from app.repo import arxiv_client
+    from app.service import arxiv_search
+
+    fake_nemotron["responses"] = [
+        json.dumps(
+            {
+                "categories": ["cs.NI"],
+                "keywords": ["quic"],
+                "time_window_months": 12,
+            }
+        )
+    ]
+
+    def raise_rate_limit(*_args, **_kwargs):
+        raise arxiv_client.ArxivRateLimitError("simulated 429")
+
+    monkeypatch.setattr(arxiv_search, "find_candidates", raise_rate_limit)
+
+    request = BriefRequest(question="how do we send files faster?")
+    brief_id = pipeline.create_pending_brief(request)
+    assert pipeline.acquire_slot()
+    pipeline.run_brief(brief_id, request)
+
+    manifest = job_state.load_manifest(brief_id)
+    assert manifest is not None
+    assert manifest.status == "failed_arxiv_rate_limit"
+    # Literal copy must match the UI's expected text exactly.
+    assert manifest.error == (
+        "arxiv is rate-limiting our query. Wait 15-30 minutes and "
+        "try again; results may also be cached by the time you retry."
+    )

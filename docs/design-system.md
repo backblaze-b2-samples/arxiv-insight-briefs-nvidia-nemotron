@@ -1,7 +1,7 @@
 <!-- last_verified: 2026-04-30 -->
 # Design System
 
-The starter uses a GitHub Primer-flavored token palette with shadcn/ui
+This sample uses a GitHub Primer-flavored token palette with shadcn/ui
 primitives. All tokens live in `apps/web/src/app/globals.css` and resolve via
 Tailwind v4's `@theme inline` block.
 
@@ -106,7 +106,7 @@ Primer palette so they drop into any Primer-styled app).
   asymmetric tail radii. User bubbles use `accent-subtle`, assistant uses
   `muted`.
 - `.chat-typing` — three-dot bounce indicator for streaming placeholders.
-- `.prompt-chip` — rounded pill for empty-state starter questions.
+- `.prompt-chip` — rounded pill for empty-state prompt chips.
 
 ### Composing a chat
 
