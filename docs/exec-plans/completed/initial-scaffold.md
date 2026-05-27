@@ -163,7 +163,7 @@ Every identifier that must change from `vibe-coding-starter-kit` to `arxiv-insig
 | Image / docker tag references | none in starter | n/a — no Docker in this sample |
 | GitHub workflow slug references | none material | `arxiv-insight-briefs-*` if any workflows are added |
 | UTM `content` tag in README/Backblaze links | `utm_content=oss-starter` (3 places in `README.md`) | `utm_content=arxiv-insight-briefs` |
-| Clone URL example | `github.com/backblaze-b2-samples/vibe-coding-starter-kit.git` | `github.com/backblaze-b2-samples/arxiv-insight-briefs.git` |
+| Clone URL example | `github.com/backblaze-b2-samples/vibe-coding-starter-kit.git` | `github.com/backblaze-labs/arxiv-insight-briefs-nvidia-nemotron.git` |
 | Initial-commit message example | `"Initial commit from vibe-coding-starter-kit"` | `"Initial commit from arxiv-insight-briefs"` |
 | `.claude/settings.local.json` filter strings | `pnpm --filter @vibe-coding-starter-kit/web …` (4 lines) | `pnpm --filter @arxiv-insight-briefs/web …` |
 | LICENSE attribution | MIT — preserve as-is | preserve MIT; update copyright line only if it bears the old slug |

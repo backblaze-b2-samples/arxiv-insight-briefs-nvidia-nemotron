@@ -51,7 +51,7 @@ b2://{B2_BUCKET_NAME}/arxiv-insight-briefs/
 You need: Node.js >= 20, pnpm >= 9, Python >= 3.11, a free [Backblaze B2 account](https://www.backblaze.com/sign-up/ai-cloud-storage?utm_source=github&utm_medium=referral&utm_campaign=ai_artifacts&utm_content=arxiv-insight-briefs), and (optional but recommended) a free [NVIDIA Build](https://build.nvidia.com) API key.
 
 ```bash
-git clone https://github.com/backblaze-b2-samples/arxiv-insight-briefs.git
+git clone https://github.com/backblaze-labs/arxiv-insight-briefs-nvidia-nemotron.git
 cd arxiv-insight-briefs
 
 pnpm install
