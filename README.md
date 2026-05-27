@@ -68,8 +68,6 @@ Frontend at `localhost:3000`, API at `localhost:8000`. `pnpm dev` runs `pnpm doc
 
 ### Required env vars
 
-Standardized per the [Backblaze sample apps standard](../CLAUDE.md):
-
 ```
 B2_ENDPOINT=https://s3.<region>.backblazeb2.com
 B2_REGION=<region>           # e.g. us-west-004
