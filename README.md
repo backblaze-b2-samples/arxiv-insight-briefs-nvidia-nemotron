@@ -1,7 +1,9 @@
 <!-- last_verified: 2026-05-26 -->
 # arXiv Insight Briefs
 
-A research-brief generator for prospects and engineers exploring **[Backblaze B2](https://www.backblaze.com/sign-up/ai-cloud-storage?utm_source=github&utm_medium=referral&utm_campaign=ai_artifacts&utm_content=arxiv-insight-briefs)** as the storage backbone for an AI workflow. You type a research question in plain English; the app routes it to arxiv categories, ranks the most recent abstracts, downloads the surviving PDFs into a content-addressed B2 cache, extracts the meaningful sections with PyMuPDF, and asks Nemotron (free on `build.nvidia.com`) for a *problem-anchored* brief — key findings, contradictions, maturity assessment, recommendations for the reader, open questions — with every claim citing a presigned link to the source PDF in your bucket.
+A reference **AI data processing pipeline** for **PDF text extraction and LLM-based synthesis**: arxiv research papers → ranked abstracts → section-trimmed full text → problem-anchored insight briefs. Every artifact — source PDFs, extracted text, generated reports — is stored in **[Backblaze B2](https://www.backblaze.com/sign-up/ai-cloud-storage?utm_source=github&utm_medium=referral&utm_campaign=ai_artifacts&utm_content=arxiv-insight-briefs)** through the S3-compatible API, with **Mistral Nemotron** on the free `build.nvidia.com` endpoint doing the routing and synthesis work.
+
+Built for prospects and engineers exploring B2 as the storage backbone of an AI workflow. You type a research question in plain English; the app routes it to arxiv categories, ranks the most recent abstracts, downloads the surviving PDFs into a content-addressed B2 cache, extracts the meaningful sections with PyMuPDF, and asks Nemotron for a *problem-anchored* brief — key findings, contradictions, maturity assessment, recommendations for the reader, open questions — with every claim citing a presigned link to the source PDF in your bucket.
 
 The point of the sample isn't summarization. It's the **B2-as-archive shape**: every brief, every cached PDF, and every extracted-text artifact lives in one bucket, fronted by S3 (`boto3`). The bucket is the database.
 
@@ -16,6 +18,17 @@ The point of the sample isn't summarization. It's the **B2-as-archive shape**: e
 - **Problem-anchored synthesis.** A single Nemotron call produces a markdown brief with structured sections and `[arxiv:ID]` citations. The runtime layer rewrites those to short-lived presigned PDF links before shipping markdown to the UI.
 - **B2 as the archive.** Every brief lives at `briefs/{id}/brief.md` + `manifest.json`. `/briefings` is just `ListObjectsV2`.
 - **File browser.** `/files` surfaces everything under the sample's B2 prefix — papers cache, brief archives, manifests — with download and delete. Unguarded by design (deleting a cached PDF just costs a re-fetch next time).
+
+## Data processing patterns
+
+This sample is a compact reference for **end-to-end AI document processing on cloud object storage**. The underlying pipeline — natural-language query → document discovery → relevance ranking → text extraction → LLM synthesis → durable storage — transfers cleanly to adjacent workloads: contract review, support-ticket triage, regulatory filing analysis, scientific literature monitoring, customer-research synthesis.
+
+- **PDF text extraction with PyMuPDF.** Section-aware extraction keeps abstract + intro + methods + conclusion, drops references and appendices, hard-caps each paper at a configurable character budget. Trade-offs documented in [`docs/features/pdf-pipeline.md`](docs/features/pdf-pipeline.md).
+- **LLM-based document ranking before full-text synthesis.** Abstracts are cheap; full-text calls are expensive. A batched ranking pass over candidate abstracts is the cost lever that makes the rest of the pipeline tractable. The pattern generalizes: cheap-signal filter, then expensive-signal synthesis.
+- **Problem-anchored AI synthesis (not generic summarization).** The synthesis prompt is framed around the reader's actual question, producing findings, contradictions, maturity assessment, and concrete recommendations — not a literature-review-style recap. This framing is the design idea the sample is selling.
+- **Content-addressed object storage cache.** Documents and their extracted text are keyed by stable id (`arxiv_id` here, but the pattern transfers to any stable document identifier). `HeadObject` short-circuits redundant fetches and redundant LLM extraction calls. Cache hits exported on `/metrics`.
+- **Durable artifact archive in S3-compatible storage.** Every brief — the raw query, the ranked-paper manifest, the synthesized markdown report — lives in one B2 bucket. `ListObjectsV2` backs the "past briefings" feed; presigned URLs back per-citation PDF sharing. There is no database; the bucket is the database.
+- **Hermetic AI pipeline testing.** Every external surface (LLM, arxiv API, B2) is patched at the repo boundary, so the full data processing pipeline runs offline in CI with no network and no API keys. Layering invariants enforced by structural tests (`boto3` and `pymupdf` confined to the `repo/` layer).
 
 ## Pipeline
 
