@@ -25,18 +25,21 @@ const REQUIRED_PNPM_MAJOR = 9;
 const REQUIRED_PYTHON_MINOR = 11; // 3.11+
 
 // Required B2 env vars. Keep in sync with services/api/main.py
-// REQUIRED_B2_SETTINGS. Per the parent CLAUDE.md these names are fixed —
+// REQUIRED_B2_SETTINGS. Per quality-keeper these names are fixed —
 // no aliases allowed.
 const REQUIRED_B2_VARS = [
-  "B2_ENDPOINT",
   "B2_REGION",
-  "B2_KEY_ID",
+  "B2_APPLICATION_KEY_ID",
   "B2_APPLICATION_KEY",
   "B2_BUCKET_NAME",
+  "B2_PUBLIC_URL_BASE",
 ];
-// `.env.example` ships with example values for endpoint and region; only
-// the secret fields are placeholders that must be filled in.
-const PLACEHOLDERS = new Set([]);
+// `.env.example` ships with placeholder values for non-secret setup fields;
+// blank secret fields are caught by the missing-var check above.
+const PLACEHOLDERS = new Set([
+  "<region>",
+  "https://f000.backblazeb2.com/file/<bucket-name>",
+]);
 
 // Soft check — NVIDIA key is optional but recommended. Warn (don't fail)
 // when it's missing so users get a heads-up that synthesis will be skipped.

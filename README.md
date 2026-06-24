@@ -82,11 +82,11 @@ Frontend at `localhost:3000`, API at `localhost:8000`. `pnpm dev` runs `pnpm doc
 ### Required env vars
 
 ```
-B2_ENDPOINT=https://s3.<region>.backblazeb2.com
 B2_REGION=<region>           # e.g. us-west-004
-B2_KEY_ID=
+B2_APPLICATION_KEY_ID=
 B2_APPLICATION_KEY=
 B2_BUCKET_NAME=
+B2_PUBLIC_URL_BASE=https://f000.backblazeb2.com/file/<bucket-name>
 ```
 
 NVIDIA settings (optional — pipeline gracefully degrades when missing):

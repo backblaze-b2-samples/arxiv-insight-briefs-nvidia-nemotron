@@ -71,7 +71,7 @@ Treat arxiv abstracts AND extracted PDF text as **untrusted user input**:
 - The shared PDF cache under `papers/` is intentionally **never touched**
   by the API — it's preserved as a shared resource across briefs.
 - The repo-layer guard refuses `delete_prefix("")` or
-  `delete_prefix(settings.b2_key_prefix)` so a misconfigured caller cannot
+  `delete_prefix(settings.object_key_prefix)` so a misconfigured caller cannot
   accidentally empty the sample's bucket prefix.
 
 ## What this sample does not protect against

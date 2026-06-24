@@ -3,17 +3,17 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     # --- Backblaze B2 (required) ---
-    # Standardized env-var names per the parent repo's CLAUDE.md.
+    # Standardized env-var names per the sample quality-keeper checks.
     # Defaults are empty so test collection never raises; lifespan validates at startup.
-    b2_endpoint: str = ""
     b2_region: str = ""
-    b2_key_id: str = ""
+    b2_application_key_id: str = ""
     b2_application_key: str = ""
     b2_bucket_name: str = ""
+    b2_public_url_base: str = ""
 
     # Object-key prefix inside the bucket — keeps this sample isolated if the
     # bucket is shared with other tools. Override per-deployment if desired.
-    b2_key_prefix: str = "arxiv-insight-briefs/"
+    object_key_prefix: str = "arxiv-insight-briefs/"
 
     # --- API ---
     api_port: int = 8000

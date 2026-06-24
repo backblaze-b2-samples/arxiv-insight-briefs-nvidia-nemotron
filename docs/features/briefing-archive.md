@@ -58,7 +58,7 @@ side-channel index — the bucket is the source of truth.
 - Manifest exists but markdown does not (in-flight brief) → `markdown` is `null`
 - Citation references an id not in the manifest → left inert
 - `mode=clear` on a missing brief → 404
-- `delete_prefix("")` or `delete_prefix(settings.b2_key_prefix)` → repo
+- `delete_prefix("")` or `delete_prefix(settings.object_key_prefix)` → repo
   guard raises `ValueError`, never bombs the bucket
 - `mode=cancel` on a completed brief → no-op, still returns 204
 

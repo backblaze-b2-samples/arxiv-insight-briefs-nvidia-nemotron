@@ -26,11 +26,11 @@ from app.runtime import briefings, files, health, metrics, papers  # noqa: E402
 # fast at server startup instead, with a human-readable message that
 # uvicorn surfaces as the first log line.
 REQUIRED_B2_SETTINGS = (
-    ("b2_endpoint", "B2_ENDPOINT"),
     ("b2_region", "B2_REGION"),
-    ("b2_key_id", "B2_KEY_ID"),
+    ("b2_application_key_id", "B2_APPLICATION_KEY_ID"),
     ("b2_application_key", "B2_APPLICATION_KEY"),
     ("b2_bucket_name", "B2_BUCKET_NAME"),
+    ("b2_public_url_base", "B2_PUBLIC_URL_BASE"),
 )
 
 
