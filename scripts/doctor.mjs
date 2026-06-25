@@ -202,7 +202,7 @@ function checkEnv() {
   if (env.B2_REGION && !PLACEHOLDERS.has(env.B2_REGION) && !B2_REGION_PATTERN.test(env.B2_REGION)) {
     fail(
       `B2_REGION is not a valid Backblaze region slug: ${env.B2_REGION}`,
-      "Use a region slug such as us-west-004, us-east-005, or eu-central-003",
+      "Use the region slug shown in your Backblaze bucket settings",
     );
   }
   // Optional vars — surface as warnings so the user knows the pipeline

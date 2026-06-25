@@ -9,7 +9,7 @@ B2_REGION_PATTERN = re.compile(r"^[a-z]{2}(?:-[a-z]+){1,2}-\d{3}$")
 def validate_b2_region(region: str) -> str:
     if not B2_REGION_PATTERN.fullmatch(region):
         raise ValueError(
-            "B2_REGION must be a Backblaze region slug like us-west-004"
+            "B2_REGION must be a Backblaze region slug"
         )
     return region
 

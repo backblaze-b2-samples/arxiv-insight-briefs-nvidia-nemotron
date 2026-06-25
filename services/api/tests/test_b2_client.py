@@ -39,16 +39,16 @@ def test_env_example_only_uses_standard_b2_env_names():
 
 
 def test_b2_region_derives_endpoint_for_valid_region():
-    assert b2_s3_endpoint_url("us-west-004") == "https://s3.us-west-004.backblazeb2.com"
-    assert Settings(b2_region="eu-central-003", _env_file=None).b2_region == "eu-central-003"
+    assert b2_s3_endpoint_url("us-test-000") == "https://s3.us-test-000.backblazeb2.com"
+    assert Settings(b2_region="us-test-000", _env_file=None).b2_region == "us-test-000"
 
 
 @pytest.mark.parametrize(
     "payload",
     [
         "attacker.example/collect",
-        "us-west-004:443/path",
-        "us-west-004?x=",
+        "us-test-000:443/path",
+        "us-test-000?x=",
     ],
 )
 def test_b2_region_rejects_url_metacharacters(payload):
@@ -79,7 +79,7 @@ def test_b2_client_honors_object_key_prefix(monkeypatch):
 
 def test_get_s3_client_uses_derived_endpoint_and_custom_user_agent(monkeypatch):
     b2_client.get_s3_client.cache_clear()
-    monkeypatch.setattr(b2_client.settings, "b2_region", "us-west-004")
+    monkeypatch.setattr(b2_client.settings, "b2_region", "us-test-000")
     monkeypatch.setattr(b2_client.settings, "b2_application_key_id", "test-key-id")
     monkeypatch.setattr(b2_client.settings, "b2_application_key", "test-application-key")
 
@@ -96,8 +96,8 @@ def test_get_s3_client_uses_derived_endpoint_and_custom_user_agent(monkeypatch):
     assert b2_client.get_s3_client() is sentinel
 
     assert captured["service_name"] == "s3"
-    assert captured["endpoint_url"] == "https://s3.us-west-004.backblazeb2.com"
-    assert captured["region_name"] == "us-west-004"
+    assert captured["endpoint_url"] == "https://s3.us-test-000.backblazeb2.com"
+    assert captured["region_name"] == "us-test-000"
     assert captured["aws_access_key_id"] == "test-key-id"
     assert captured["aws_secret_access_key"] == "test-application-key"
     assert "(backblaze-b2-samples)" in captured["config"].user_agent_extra
