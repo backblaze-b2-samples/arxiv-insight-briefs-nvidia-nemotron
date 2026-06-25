@@ -36,7 +36,9 @@ REQUIRED_B2_SETTINGS = (
 
 @asynccontextmanager
 async def lifespan(_app: "FastAPI"):
-    if os.getenv(LEGACY_OBJECT_KEY_PREFIX_ENV) and not os.getenv(OBJECT_KEY_PREFIX_ENV):
+    legacy_prefix_present = LEGACY_OBJECT_KEY_PREFIX_ENV in os.environ
+    object_prefix_present = OBJECT_KEY_PREFIX_ENV in os.environ
+    if legacy_prefix_present and not object_prefix_present:
         logger.warning(
             "%s is deprecated; rename it to %s. It is honored as a fallback for now.",
             LEGACY_OBJECT_KEY_PREFIX_ENV,

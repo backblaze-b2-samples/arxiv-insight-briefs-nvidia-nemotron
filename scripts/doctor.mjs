@@ -62,6 +62,10 @@ function warn(msg, fix) {
   warnings.push({ msg, fix });
 }
 
+function hasEnv(env, key) {
+  return Object.prototype.hasOwnProperty.call(env, key);
+}
+
 function tryExec(cmd) {
   try {
     return execSync(cmd, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
@@ -178,20 +182,20 @@ function checkEnv() {
     return;
   }
   const env = parseEnvFile(ENV_FILE);
-  const legacy = LEGACY_REQUIRED_B2_VARS.filter((k) => env[k]);
+  const legacy = LEGACY_REQUIRED_B2_VARS.filter((k) => hasEnv(env, k));
   if (legacy.length > 0) {
     fail(
       `.env uses legacy B2 variables: ${legacy.join(", ")}`,
       "Use B2_REGION, B2_APPLICATION_KEY_ID, B2_APPLICATION_KEY, and B2_BUCKET_NAME",
     );
   }
-  if (env[LEGACY_PREFIX_VAR] && !env[OBJECT_PREFIX_VAR]) {
+  if (hasEnv(env, LEGACY_PREFIX_VAR) && !hasEnv(env, OBJECT_PREFIX_VAR)) {
     warn(
       `${LEGACY_PREFIX_VAR} is deprecated`,
       `${LEGACY_PREFIX_VAR} is honored as a fallback for now. Rename it to ${OBJECT_PREFIX_VAR}.`,
     );
   }
-  if (env[LEGACY_PREFIX_VAR] && env[OBJECT_PREFIX_VAR]) {
+  if (hasEnv(env, LEGACY_PREFIX_VAR) && hasEnv(env, OBJECT_PREFIX_VAR)) {
     warn(
       `${LEGACY_PREFIX_VAR} is ignored because ${OBJECT_PREFIX_VAR} is set`,
       `Remove ${LEGACY_PREFIX_VAR} and keep ${OBJECT_PREFIX_VAR}.`,

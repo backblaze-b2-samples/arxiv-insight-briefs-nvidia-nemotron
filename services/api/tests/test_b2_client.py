@@ -113,6 +113,10 @@ def test_object_key_prefix_uses_non_b2_env_name(monkeypatch):
 
     assert Settings(_env_file=None).object_key_prefix == "custom-prefix/"
 
+    monkeypatch.setenv("OBJECT_KEY_PREFIX", "")
+
+    assert Settings(_env_file=None).object_key_prefix == ""
+
 
 @pytest.mark.asyncio
 async def test_lifespan_warns_for_legacy_object_key_prefix(monkeypatch, caplog):
@@ -124,6 +128,20 @@ async def test_lifespan_warns_for_legacy_object_key_prefix(monkeypatch, caplog):
             pass
 
     assert "B2_KEY_PREFIX is deprecated; rename it to OBJECT_KEY_PREFIX" in caplog.text
+
+
+@pytest.mark.asyncio
+async def test_lifespan_does_not_warn_fallback_when_object_prefix_is_present(
+    monkeypatch, caplog
+):
+    monkeypatch.setenv("B2_KEY_PREFIX", "legacy-prefix/")
+    monkeypatch.setenv("OBJECT_KEY_PREFIX", "")
+
+    with caplog.at_level(logging.WARNING, logger="api"):
+        async with lifespan(app):
+            pass
+
+    assert "honored as a fallback" not in caplog.text
 
 
 def test_b2_public_url_base_is_optional(monkeypatch):

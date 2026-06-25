@@ -82,7 +82,7 @@ Frontend at `localhost:3000`, API at `localhost:8000`. `pnpm dev` runs `pnpm doc
 ### Required env vars
 
 ```
-B2_REGION=<region>           # e.g. us-west-004
+B2_REGION=<region>           # e.g. us-test-000
 B2_APPLICATION_KEY_ID=
 B2_APPLICATION_KEY=
 B2_BUCKET_NAME=
