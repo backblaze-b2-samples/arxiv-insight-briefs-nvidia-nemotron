@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 import sys
 from contextlib import asynccontextmanager
 from datetime import UTC, datetime
@@ -17,7 +18,7 @@ from fastapi import FastAPI  # noqa: E402
 from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 from starlette.middleware.base import BaseHTTPMiddleware  # noqa: E402
 
-from app.config import settings  # noqa: E402
+from app.config import LEGACY_OBJECT_KEY_PREFIX_ENV, OBJECT_KEY_PREFIX_ENV, settings  # noqa: E402
 from app.runtime import briefings, files, health, metrics, papers  # noqa: E402
 
 # --- Startup validation ---
@@ -26,9 +27,8 @@ from app.runtime import briefings, files, health, metrics, papers  # noqa: E402
 # fast at server startup instead, with a human-readable message that
 # uvicorn surfaces as the first log line.
 REQUIRED_B2_SETTINGS = (
-    ("b2_endpoint", "B2_ENDPOINT"),
     ("b2_region", "B2_REGION"),
-    ("b2_key_id", "B2_KEY_ID"),
+    ("b2_application_key_id", "B2_APPLICATION_KEY_ID"),
     ("b2_application_key", "B2_APPLICATION_KEY"),
     ("b2_bucket_name", "B2_BUCKET_NAME"),
 )
@@ -36,6 +36,14 @@ REQUIRED_B2_SETTINGS = (
 
 @asynccontextmanager
 async def lifespan(_app: "FastAPI"):
+    legacy_prefix_present = LEGACY_OBJECT_KEY_PREFIX_ENV in os.environ
+    object_prefix_present = OBJECT_KEY_PREFIX_ENV in os.environ
+    if legacy_prefix_present and not object_prefix_present:
+        logger.warning(
+            "%s is deprecated; rename it to %s. It is honored as a fallback for now.",
+            LEGACY_OBJECT_KEY_PREFIX_ENV,
+            OBJECT_KEY_PREFIX_ENV,
+        )
     missing = [
         env_name
         for attr, env_name in REQUIRED_B2_SETTINGS

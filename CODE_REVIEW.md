@@ -18,9 +18,8 @@ Use this list when reviewing a PR against this sample. Anything marked
 - ❌ S3 client without `customUserAgent` / `user_agent_extra` containing
   `(backblaze-b2-samples)`
 - ❌ Hardcoded region string in source (e.g. `"us-west-004"`) outside docs
-- ❌ Env-var aliases (`B2_S3_ENDPOINT`, `B2_APPLICATION_KEY_ID`,
-  `AWS_*` prefixes) — keys must be exactly `B2_ENDPOINT`, `B2_REGION`,
-  `B2_KEY_ID`, `B2_APPLICATION_KEY`, `B2_BUCKET_NAME`
+- ❌ Legacy endpoint/key-id aliases or `AWS_*` prefixes — keys must be exactly `B2_APPLICATION_KEY_ID`,
+  `B2_APPLICATION_KEY`, `B2_BUCKET_NAME`, `B2_REGION`, `B2_PUBLIC_URL_BASE`
 - ❌ `delete_prefix` called with empty string or the sample's top-level prefix
 - ⚠️ Any new presigned URL TTL longer than 24 hours
 

@@ -1,19 +1,42 @@
+import os
+import re
+
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings
+
+B2_REGION_PATTERN = re.compile(r"^[a-z]{2}(?:-[a-z]+){1,2}-\d{3}$")
+DEFAULT_OBJECT_KEY_PREFIX = "arxiv-insight-briefs/"
+OBJECT_KEY_PREFIX_ENV = "OBJECT_KEY_PREFIX"
+LEGACY_OBJECT_KEY_PREFIX_ENV = "B2_KEY_PREFIX"
+
+
+def validate_b2_region(region: str) -> str:
+    if not B2_REGION_PATTERN.fullmatch(region):
+        raise ValueError("B2_REGION must be a Backblaze region slug")
+    return region
+
+
+def b2_s3_endpoint_url(region: str) -> str:
+    return f"https://s3.{validate_b2_region(region)}.backblazeb2.com"
+
+
+def default_object_key_prefix() -> str:
+    return os.getenv(LEGACY_OBJECT_KEY_PREFIX_ENV, DEFAULT_OBJECT_KEY_PREFIX)
 
 
 class Settings(BaseSettings):
     # --- Backblaze B2 (required) ---
-    # Standardized env-var names per the parent repo's CLAUDE.md.
+    # Standardized env-var names per the sample quality-keeper checks.
     # Defaults are empty so test collection never raises; lifespan validates at startup.
-    b2_endpoint: str = ""
     b2_region: str = ""
-    b2_key_id: str = ""
+    b2_application_key_id: str = ""
     b2_application_key: str = ""
     b2_bucket_name: str = ""
+    b2_public_url_base: str = ""
 
     # Object-key prefix inside the bucket — keeps this sample isolated if the
     # bucket is shared with other tools. Override per-deployment if desired.
-    b2_key_prefix: str = "arxiv-insight-briefs/"
+    object_key_prefix: str = Field(default_factory=default_object_key_prefix)
 
     # --- API ---
     api_port: int = 8000
@@ -39,7 +62,14 @@ class Settings(BaseSettings):
     # Presigned URL TTL for per-citation PDF links surfaced in the UI.
     presigned_ttl_seconds: int = 3600
 
-    model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
+    model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
+
+    @field_validator("b2_region")
+    @classmethod
+    def validate_region(cls, region: str) -> str:
+        if not region:
+            return region
+        return validate_b2_region(region)
 
     @property
     def cors_origins(self) -> list[str]:

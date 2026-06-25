@@ -13,7 +13,7 @@ import boto3
 from botocore.config import Config
 from botocore.exceptions import ClientError
 
-from app.config import settings
+from app.config import b2_s3_endpoint_url, settings
 
 # App identity used for the custom user agent. Bumped manually; do not source
 # from pyproject.toml at import time (avoids the dependency).
@@ -21,14 +21,18 @@ APP_SLUG = "arxiv-insight-briefs"
 APP_VERSION = "0.1.0"
 
 
+def _s3_endpoint_url() -> str:
+    return b2_s3_endpoint_url(settings.b2_region)
+
+
 @functools.lru_cache(maxsize=1)
 def get_s3_client():
     """Module-level singleton — boto3 maintains its own HTTP connection pool."""
     return boto3.client(
         "s3",
-        endpoint_url=settings.b2_endpoint,
+        endpoint_url=_s3_endpoint_url(),
         region_name=settings.b2_region,
-        aws_access_key_id=settings.b2_key_id,
+        aws_access_key_id=settings.b2_application_key_id,
         aws_secret_access_key=settings.b2_application_key,
         config=Config(
             signature_version="s3v4",
@@ -39,14 +43,14 @@ def get_s3_client():
 
 def _full_key(key: str) -> str:
     """Prepend the sample-level key prefix (keeps the bucket shareable)."""
-    prefix = settings.b2_key_prefix
+    prefix = settings.object_key_prefix
     if prefix and not key.startswith(prefix):
         return prefix + key
     return key
 
 
 def _strip_prefix(key: str) -> str:
-    prefix = settings.b2_key_prefix
+    prefix = settings.object_key_prefix
     if prefix and key.startswith(prefix):
         return key[len(prefix):]
     return key
@@ -162,7 +166,7 @@ def delete_prefix(prefix: str) -> int:
     Used by the "clear cached briefings" admin action. Never call with an
     empty prefix — refuses to operate at the bucket root.
     """
-    if not prefix or prefix in ("/", settings.b2_key_prefix):
+    if not prefix or prefix in ("/", settings.object_key_prefix):
         raise ValueError("delete_prefix refuses to operate at the bucket root")
     client = get_s3_client()
     deleted = 0

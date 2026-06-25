@@ -25,18 +25,23 @@ const REQUIRED_PNPM_MAJOR = 9;
 const REQUIRED_PYTHON_MINOR = 11; // 3.11+
 
 // Required B2 env vars. Keep in sync with services/api/main.py
-// REQUIRED_B2_SETTINGS. Per the parent CLAUDE.md these names are fixed —
+// REQUIRED_B2_SETTINGS. Per quality-keeper these names are fixed —
 // no aliases allowed.
 const REQUIRED_B2_VARS = [
-  "B2_ENDPOINT",
   "B2_REGION",
-  "B2_KEY_ID",
+  "B2_APPLICATION_KEY_ID",
   "B2_APPLICATION_KEY",
   "B2_BUCKET_NAME",
 ];
-// `.env.example` ships with example values for endpoint and region; only
-// the secret fields are placeholders that must be filled in.
-const PLACEHOLDERS = new Set([]);
+// `.env.example` ships with placeholder values for non-secret setup fields;
+// blank secret fields are caught by the missing-var check above.
+const PLACEHOLDERS = new Set([
+  "<region>",
+]);
+const B2_REGION_PATTERN = /^[a-z]{2}(?:-[a-z]+){1,2}-\d{3}$/;
+const LEGACY_REQUIRED_B2_VARS = ["B2_ENDPOINT", "B2_KEY_ID", "B2_S3_ENDPOINT"];
+const LEGACY_PREFIX_VAR = "B2_KEY_PREFIX";
+const OBJECT_PREFIX_VAR = "OBJECT_KEY_PREFIX";
 
 // Soft check — NVIDIA key is optional but recommended. Warn (don't fail)
 // when it's missing so users get a heads-up that synthesis will be skipped.
@@ -55,6 +60,10 @@ function fail(msg, fix) {
 
 function warn(msg, fix) {
   warnings.push({ msg, fix });
+}
+
+function hasEnv(env, key) {
+  return Object.prototype.hasOwnProperty.call(env, key);
 }
 
 function tryExec(cmd) {
@@ -173,6 +182,25 @@ function checkEnv() {
     return;
   }
   const env = parseEnvFile(ENV_FILE);
+  const legacy = LEGACY_REQUIRED_B2_VARS.filter((k) => hasEnv(env, k));
+  if (legacy.length > 0) {
+    fail(
+      `.env uses legacy B2 variables: ${legacy.join(", ")}`,
+      "Use B2_REGION, B2_APPLICATION_KEY_ID, B2_APPLICATION_KEY, and B2_BUCKET_NAME",
+    );
+  }
+  if (hasEnv(env, LEGACY_PREFIX_VAR) && !hasEnv(env, OBJECT_PREFIX_VAR)) {
+    warn(
+      `${LEGACY_PREFIX_VAR} is deprecated`,
+      `${LEGACY_PREFIX_VAR} is honored as a fallback for now. Rename it to ${OBJECT_PREFIX_VAR}.`,
+    );
+  }
+  if (hasEnv(env, LEGACY_PREFIX_VAR) && hasEnv(env, OBJECT_PREFIX_VAR)) {
+    warn(
+      `${LEGACY_PREFIX_VAR} is ignored because ${OBJECT_PREFIX_VAR} is set`,
+      `Remove ${LEGACY_PREFIX_VAR} and keep ${OBJECT_PREFIX_VAR}.`,
+    );
+  }
   const missing = REQUIRED_B2_VARS.filter((k) => !env[k]);
   if (missing.length > 0) {
     fail(
@@ -187,6 +215,12 @@ function checkEnv() {
     fail(
       `.env still has placeholder values: ${placeholders.join(", ")}`,
       "Edit .env and replace placeholders with your real B2 credentials (https://secure.backblaze.com/app_keys.htm?utm_source=github&utm_medium=referral&utm_campaign=ai_artifacts&utm_content=arxiv-insight-briefs)",
+    );
+  }
+  if (env.B2_REGION && !PLACEHOLDERS.has(env.B2_REGION) && !B2_REGION_PATTERN.test(env.B2_REGION)) {
+    fail(
+      `B2_REGION is not a valid Backblaze region slug: ${env.B2_REGION}`,
+      "Use the region slug shown in your Backblaze bucket settings",
     );
   }
   // Optional vars — surface as warnings so the user knows the pipeline
