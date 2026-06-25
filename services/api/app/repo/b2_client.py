@@ -13,7 +13,7 @@ import boto3
 from botocore.config import Config
 from botocore.exceptions import ClientError
 
-from app.config import settings
+from app.config import b2_s3_endpoint_url, settings
 
 # App identity used for the custom user agent. Bumped manually; do not source
 # from pyproject.toml at import time (avoids the dependency).
@@ -22,7 +22,7 @@ APP_VERSION = "0.1.0"
 
 
 def _s3_endpoint_url() -> str:
-    return f"https://s3.{settings.b2_region}.backblazeb2.com"
+    return b2_s3_endpoint_url(settings.b2_region)
 
 
 @functools.lru_cache(maxsize=1)

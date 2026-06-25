@@ -16,11 +16,10 @@ from typing import Any
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-os.environ.setdefault("B2_REGION", "us-test-000")
+os.environ.setdefault("B2_REGION", "us-west-004")
 os.environ.setdefault("B2_APPLICATION_KEY_ID", "test_key_id")
 os.environ.setdefault("B2_APPLICATION_KEY", "test_application_key")
 os.environ.setdefault("B2_BUCKET_NAME", "test-bucket")
-os.environ.setdefault("B2_PUBLIC_URL_BASE", "https://f000.backblazeb2.com/file/test-bucket")
 
 
 @pytest.fixture

@@ -32,14 +32,14 @@ const REQUIRED_B2_VARS = [
   "B2_APPLICATION_KEY_ID",
   "B2_APPLICATION_KEY",
   "B2_BUCKET_NAME",
-  "B2_PUBLIC_URL_BASE",
 ];
 // `.env.example` ships with placeholder values for non-secret setup fields;
 // blank secret fields are caught by the missing-var check above.
 const PLACEHOLDERS = new Set([
   "<region>",
-  "https://f000.backblazeb2.com/file/<bucket-name>",
 ]);
+const B2_REGION_PATTERN = /^[a-z]{2}(?:-[a-z]+){1,2}-\d{3}$/;
+const LEGACY_B2_VARS = ["B2_ENDPOINT", "B2_KEY_ID", "B2_S3_ENDPOINT"];
 
 // Soft check — NVIDIA key is optional but recommended. Warn (don't fail)
 // when it's missing so users get a heads-up that synthesis will be skipped.
@@ -176,6 +176,13 @@ function checkEnv() {
     return;
   }
   const env = parseEnvFile(ENV_FILE);
+  const legacy = LEGACY_B2_VARS.filter((k) => env[k]);
+  if (legacy.length > 0) {
+    fail(
+      `.env uses legacy B2 variables: ${legacy.join(", ")}`,
+      "Use B2_REGION, B2_APPLICATION_KEY_ID, B2_APPLICATION_KEY, and B2_BUCKET_NAME",
+    );
+  }
   const missing = REQUIRED_B2_VARS.filter((k) => !env[k]);
   if (missing.length > 0) {
     fail(
@@ -190,6 +197,12 @@ function checkEnv() {
     fail(
       `.env still has placeholder values: ${placeholders.join(", ")}`,
       "Edit .env and replace placeholders with your real B2 credentials (https://secure.backblaze.com/app_keys.htm?utm_source=github&utm_medium=referral&utm_campaign=ai_artifacts&utm_content=arxiv-insight-briefs)",
+    );
+  }
+  if (env.B2_REGION && !PLACEHOLDERS.has(env.B2_REGION) && !B2_REGION_PATTERN.test(env.B2_REGION)) {
+    fail(
+      `B2_REGION is not a valid Backblaze region slug: ${env.B2_REGION}`,
+      "Use a region slug such as us-west-004, us-east-005, or eu-central-003",
     );
   }
   // Optional vars — surface as warnings so the user knows the pipeline

@@ -1,4 +1,21 @@
+import re
+
+from pydantic import field_validator
 from pydantic_settings import BaseSettings
+
+B2_REGION_PATTERN = re.compile(r"^[a-z]{2}(?:-[a-z]+){1,2}-\d{3}$")
+
+
+def validate_b2_region(region: str) -> str:
+    if not B2_REGION_PATTERN.fullmatch(region):
+        raise ValueError(
+            "B2_REGION must be a Backblaze region slug like us-west-004"
+        )
+    return region
+
+
+def b2_s3_endpoint_url(region: str) -> str:
+    return f"https://s3.{validate_b2_region(region)}.backblazeb2.com"
 
 
 class Settings(BaseSettings):
@@ -39,7 +56,14 @@ class Settings(BaseSettings):
     # Presigned URL TTL for per-citation PDF links surfaced in the UI.
     presigned_ttl_seconds: int = 3600
 
-    model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
+    model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
+
+    @field_validator("b2_region")
+    @classmethod
+    def validate_region(cls, region: str) -> str:
+        if not region:
+            return region
+        return validate_b2_region(region)
 
     @property
     def cors_origins(self) -> list[str]:
