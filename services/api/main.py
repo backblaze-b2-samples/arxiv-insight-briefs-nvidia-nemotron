@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 import sys
 from contextlib import asynccontextmanager
 from datetime import UTC, datetime
@@ -17,7 +18,7 @@ from fastapi import FastAPI  # noqa: E402
 from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 from starlette.middleware.base import BaseHTTPMiddleware  # noqa: E402
 
-from app.config import settings  # noqa: E402
+from app.config import LEGACY_OBJECT_KEY_PREFIX_ENV, OBJECT_KEY_PREFIX_ENV, settings  # noqa: E402
 from app.runtime import briefings, files, health, metrics, papers  # noqa: E402
 
 # --- Startup validation ---
@@ -35,6 +36,12 @@ REQUIRED_B2_SETTINGS = (
 
 @asynccontextmanager
 async def lifespan(_app: "FastAPI"):
+    if os.getenv(LEGACY_OBJECT_KEY_PREFIX_ENV) and not os.getenv(OBJECT_KEY_PREFIX_ENV):
+        logger.warning(
+            "%s is deprecated; rename it to %s. It is honored as a fallback for now.",
+            LEGACY_OBJECT_KEY_PREFIX_ENV,
+            OBJECT_KEY_PREFIX_ENV,
+        )
     missing = [
         env_name
         for attr, env_name in REQUIRED_B2_SETTINGS

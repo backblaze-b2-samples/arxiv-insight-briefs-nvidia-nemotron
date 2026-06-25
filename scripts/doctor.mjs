@@ -39,7 +39,9 @@ const PLACEHOLDERS = new Set([
   "<region>",
 ]);
 const B2_REGION_PATTERN = /^[a-z]{2}(?:-[a-z]+){1,2}-\d{3}$/;
-const LEGACY_B2_VARS = ["B2_ENDPOINT", "B2_KEY_ID", "B2_S3_ENDPOINT"];
+const LEGACY_REQUIRED_B2_VARS = ["B2_ENDPOINT", "B2_KEY_ID", "B2_S3_ENDPOINT"];
+const LEGACY_PREFIX_VAR = "B2_KEY_PREFIX";
+const OBJECT_PREFIX_VAR = "OBJECT_KEY_PREFIX";
 
 // Soft check — NVIDIA key is optional but recommended. Warn (don't fail)
 // when it's missing so users get a heads-up that synthesis will be skipped.
@@ -176,11 +178,23 @@ function checkEnv() {
     return;
   }
   const env = parseEnvFile(ENV_FILE);
-  const legacy = LEGACY_B2_VARS.filter((k) => env[k]);
+  const legacy = LEGACY_REQUIRED_B2_VARS.filter((k) => env[k]);
   if (legacy.length > 0) {
     fail(
       `.env uses legacy B2 variables: ${legacy.join(", ")}`,
       "Use B2_REGION, B2_APPLICATION_KEY_ID, B2_APPLICATION_KEY, and B2_BUCKET_NAME",
+    );
+  }
+  if (env[LEGACY_PREFIX_VAR] && !env[OBJECT_PREFIX_VAR]) {
+    warn(
+      `${LEGACY_PREFIX_VAR} is deprecated`,
+      `${LEGACY_PREFIX_VAR} is honored as a fallback for now. Rename it to ${OBJECT_PREFIX_VAR}.`,
+    );
+  }
+  if (env[LEGACY_PREFIX_VAR] && env[OBJECT_PREFIX_VAR]) {
+    warn(
+      `${LEGACY_PREFIX_VAR} is ignored because ${OBJECT_PREFIX_VAR} is set`,
+      `Remove ${LEGACY_PREFIX_VAR} and keep ${OBJECT_PREFIX_VAR}.`,
     );
   }
   const missing = REQUIRED_B2_VARS.filter((k) => !env[k]);

@@ -1,21 +1,27 @@
+import os
 import re
 
-from pydantic import field_validator
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings
 
 B2_REGION_PATTERN = re.compile(r"^[a-z]{2}(?:-[a-z]+){1,2}-\d{3}$")
+DEFAULT_OBJECT_KEY_PREFIX = "arxiv-insight-briefs/"
+OBJECT_KEY_PREFIX_ENV = "OBJECT_KEY_PREFIX"
+LEGACY_OBJECT_KEY_PREFIX_ENV = "B2_KEY_PREFIX"
 
 
 def validate_b2_region(region: str) -> str:
     if not B2_REGION_PATTERN.fullmatch(region):
-        raise ValueError(
-            "B2_REGION must be a Backblaze region slug"
-        )
+        raise ValueError("B2_REGION must be a Backblaze region slug")
     return region
 
 
 def b2_s3_endpoint_url(region: str) -> str:
     return f"https://s3.{validate_b2_region(region)}.backblazeb2.com"
+
+
+def default_object_key_prefix() -> str:
+    return os.getenv(LEGACY_OBJECT_KEY_PREFIX_ENV, DEFAULT_OBJECT_KEY_PREFIX)
 
 
 class Settings(BaseSettings):
@@ -30,7 +36,7 @@ class Settings(BaseSettings):
 
     # Object-key prefix inside the bucket — keeps this sample isolated if the
     # bucket is shared with other tools. Override per-deployment if desired.
-    object_key_prefix: str = "arxiv-insight-briefs/"
+    object_key_prefix: str = Field(default_factory=default_object_key_prefix)
 
     # --- API ---
     api_port: int = 8000

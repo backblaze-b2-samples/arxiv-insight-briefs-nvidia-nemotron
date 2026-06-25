@@ -106,6 +106,16 @@ MAX_BRIEFS_IN_FLIGHT=2
 MAX_PAPER_CHARS=12000
 ```
 
+Storage scoping (optional):
+
+```
+OBJECT_KEY_PREFIX=arxiv-insight-briefs/
+```
+
+Older deployments that set `B2_KEY_PREFIX` are honored as a deprecated
+fallback when `OBJECT_KEY_PREFIX` is absent, and startup logs a warning to
+rename the variable before the fallback is removed.
+
 ## Graceful degradation
 
 Designed for the failure modes you'll actually hit:
